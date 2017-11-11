@@ -18,6 +18,11 @@ app.use(session({
     cookie: { secure: true }
 }));
 
+// APIs
+var users = require('./routes/users');
+
+app.use('/api/v1/users', users);
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     var err = new Error('Not Found');
