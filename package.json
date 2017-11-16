@@ -6,6 +6,10 @@
     "test": "jest",
     "start": "node ./bin/www"
   },
+  "jest": {
+    "verbose": true,
+    "collectCoverage": true
+  },
   "dependencies": {
     "async": "^2.6.0",
     "bcrypt": "^1.0.3",
