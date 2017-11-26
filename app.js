@@ -15,13 +15,15 @@ app.use(session({
     secret: 'j2dfn923dnSFnnf£%eun!scefwfnCC_3',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true }
+    cookie: {secure: true}
 }));
 
 // APIs
 var users = require('./routes/users');
+var requests = require('./routes/requests');
 
 app.use('/api/v1/users', users);
+app.use('/api/v1/requests', requests);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
