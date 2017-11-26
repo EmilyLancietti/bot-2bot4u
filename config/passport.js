@@ -102,7 +102,7 @@ module.exports = function (passport) {
                             console.log('creazione token...');
                             models.Token
                                 .create({
-                                    token: randtoken.generate(32),
+                                    token: randtoken.generate(188),
                                     type: 'Interno',
                                     user_id: user.email
                                 })
