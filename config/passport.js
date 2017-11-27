@@ -65,70 +65,80 @@ module.exports = function (passport) {
                    return done(null, false);
                }
                else {
-                   console.log('utente non ancora registrato: inserimento nel database:');
-                   async.waterfall([
-                       function(next) {
-                        console.log('encrypt password...');
-                            password_utility.cryptPassword(password, function (err, password) {
-                                if(err) {
-                                    console.log('error password encrypt');
-                                    next(err);
-                                }
-                                else {
-                                    next(null, password);
-                                }
-                            });
-                       },
-                       // creazione utente
-                       function (password, next) {
-                           console.log('creazione dell\'utente...');
-                           models.User
-                               .create({
-                                   full_name: req.body.full_name,
-                                   email: email,
-                                   password: password
-                               })
-                               .then(function(user) {
-                                   console.log('utente creato.');
-                                   next(null, user);
-                               })
-                               .catch(function(err) {
-                                   console.log('errore nella creazione dell\'utente');
-                                   next(err);
-                               });
-                       },
-                       // creazione token
-                       function (user, next) {
-                            console.log('creazione token...');
-                            models.Token
-                                .create({
-                                    token: randtoken.generate(188),
-                                    type: 'Interno',
-                                    user_id: user.email
-                                })
-                                .then(function(token) {
-                                    console.log('token creato.');
-                                    next(null, {user: user, token: token});
-                                })
-                                .catch(function(err) {
-                                    console.log('errore nella creazione del token');
-                                    next(err);
-                                });
-                       }
-               ], function(err, results) {
-                           if (err) {
-                               console.log('errori nel waterfall');
-                               return done(err);
-                           }
-                           else {
-                               console.log('utente: ' + results.user);
-                               console.log('token: ' + results.token);
-                               return done(null, results);
-                           }
-                       }
+                   console.log('utente non ancora registrato');
 
+                    // Verifica che le password inserite coincidano
+                   if(req.body.password === req.body.confirm_password) {
+                       // Le password coincidono
 
-                   );
+                       console.log('Inserimento nel database...');
+                       async.waterfall([
+                               function(next) {
+                                   console.log('encrypt password...');
+                                   password_utility.cryptPassword(password, function (err, password) {
+                                       if(err) {
+                                           console.log('error password encrypt');
+                                           next(err);
+                                       }
+                                       else {
+                                           next(null, password);
+                                       }
+                                   });
+                               },
+                               // creazione utente
+                               function (password, next) {
+                                   console.log('creazione dell\'utente...');
+                                   models.User
+                                       .create({
+                                           full_name: req.body.full_name,
+                                           email: email,
+                                           password: password
+                                       })
+                                       .then(function(user) {
+                                           console.log('utente creato.');
+                                           next(null, user);
+                                       })
+                                       .catch(function(err) {
+                                           console.log('errore nella creazione dell\'utente');
+                                           next(err);
+                                       });
+                               },
+                               // creazione token
+                               function (user, next) {
+                                   console.log('creazione token...');
+                                   models.Token
+                                       .create({
+                                           token: randtoken.generate(188),
+                                           type: 'Interno',
+                                           user_id: user.email
+                                       })
+                                       .then(function(token) {
+                                           console.log('token creato.');
+                                           next(null, {user: user, token: token});
+                                       })
+                                       .catch(function(err) {
+                                           console.log('errore nella creazione del token');
+                                           next(err);
+                                       });
+                               }
+                           ], function(err, results) {
+                               if (err) {
+                                   console.log('errori nel waterfall');
+                                   return done(err);
+                               }
+                               else {
+                                   console.log('utente: ' + results.user);
+                                   console.log('token: ' + results.token);
+                                   return done(null, results);
+                               }
+                           }
+                       );
+                   }
+                   else {
+                       // Le password non coincidono
+                       console.log('Le password inserite non coincidono');
+                       return done(null, false);
+                   }
                }
            })
 

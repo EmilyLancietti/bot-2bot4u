@@ -12,8 +12,8 @@ module.exports = function (passport) {
     });
 
     router.post('/signup', passport.authenticate('localSignup', {
-        successRedirect: '/passport',
-        failureRedirect: '/passport/login'
+            successRedirect: '/passport/login',
+            failureRedirect: '/passport'
     }));
 
 
