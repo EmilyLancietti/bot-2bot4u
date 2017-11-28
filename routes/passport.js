@@ -1,5 +1,7 @@
 'use strict';
 
+var response = require('../modules/json_response');
+
 var express = require('express');
 var router = express.Router();
 
@@ -7,14 +9,32 @@ module.exports = function (passport) {
     // =====================================
     // SIGNUP ROUTES =======================
     // =====================================
+
+    // TODO: togliere
     router.get('/signup', function (req, res) {
         res.render('signup.ejs');
     });
 
-    router.post('/signup', passport.authenticate('localSignup', {
-            successRedirect: '/passport/login',
-            failureRedirect: '/passport'
-    }));
+
+    router.post('/signup', function (req, res, next) {
+        // Custom callback
+        passport.authenticate('localSignup', function (err, user, info) {
+            if (err) {
+                response(res, err, 401);
+            }
+            if (!user) {
+                console.log(info);
+                response(res, info, 400);
+            } else {
+                req.login(user, function (loginErr) {
+                    if (loginErr) {
+                        response(res, loginErr, 401);
+                    }
+                    response(res, req.user.token.token, 201);
+                });
+            }
+        })(req, res, next);
+    });
 
 
     // =====================================
@@ -24,14 +44,24 @@ module.exports = function (passport) {
         res.render('login.ejs');
     });
 
-    router.post('/login', passport.authenticate('localLogin', {
-        failureRedirect: '/passport'
-    }), function (req, res) {
-        // Qui entra solo se autenticato
-        console.log(req.user);
-        res.render('profile.ejs', {
-            user: req.user
-        });
+
+    router.post('/login', function (req, res, next) {
+        // Custom callback
+        passport.authenticate('localLogin', function (err, user, info) {
+            if (err) {
+                response(res, err, 401);
+            }
+            if (!user) {
+                response(res, info, 400);
+            } else {
+                req.login(user, function (loginErr) {
+                    if (loginErr) {
+                        response(res, loginErr, 401);
+                    }
+                    response(res, req.user.token.token, 201);
+                });
+            }
+        })(req, res, next);
     });
 
 
@@ -42,21 +72,26 @@ module.exports = function (passport) {
         scope: ['profile', 'email']
     }));
 
-    /* // handle the callback after facebook has authenticated the user
-     router.get('/auth/google/callback', passport.authenticate('googleLogin', {
-         successRedirect: '/passport/profile',
-         failureRedirect: '/passport'
-     }));*/
 
-    router.get('/auth/google/callback', passport.authenticate('googleLogin', {
-        failureRedirect: '/passport'
-    }), function (req, res) {
-        // Qui entra solo se autenticato
-        console.log(req.user);
-        res.render('profile.ejs', {
-            user: req.user
-        });
+    router.get('/auth/google/callback', function (req, res, next) {
+        // Custom callback
+        passport.authenticate('googleLogin', function (err, user, info) {
+            if (err) {
+                response(res, err, 401);
+            }
+            if (!user) {
+                response(res, info, 400);
+            } else {
+                req.login(user, function (loginErr) {
+                    if (loginErr) {
+                        response(res, loginErr, 401);
+                    }
+                    response(res, req.user.token.token, 200);
+                });
+            }
+        })(req, res, next);
     });
+
 
 
     // =====================================
@@ -66,22 +101,23 @@ module.exports = function (passport) {
         scope: ['public_profile', 'email']
     }));
 
-    /*router.get('/auth/facebook/callback',
-        passport.authenticate('facebookLogin', {
-                successRedirect: '/passport/profile',
-                failureRedirect: '/passport'
-            })
-    );*/
-
-
-    router.get('/auth/facebook/callback', passport.authenticate('facebookLogin', {
-        failureRedirect: '/passport'
-    }), function (req, res) {
-        // Qui entra solo se autenticato
-        console.log(req.user);
-        res.render('profile.ejs', {
-            user: req.user
-        });
+    router.get('/auth/facebook/callback', function (req, res, next) {
+        // Custom callback
+        passport.authenticate('facebookLogin', function (err, user, info) {
+            if (err) {
+                response(res, err, 401);
+            }
+            if (!user) {
+                response(res, info, 400);
+            } else {
+                req.login(user, function (loginErr) {
+                    if (loginErr) {
+                        response(res, loginErr, 401);
+                    }
+                    response(res, req.user.token.token, 200);
+                });
+            }
+        })(req, res, next);
     });
 
 

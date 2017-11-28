@@ -23,21 +23,25 @@ module.exports = function (passport) {
     // passport needs ability to serialize and de-serialize users out of session
 
 
-    passport.serializeUser(function(results, done) {
+    passport.serializeUser(function (results, done) {
         console.log("SERIALIZE", results.user.email);
-        var sessionUser = {_id: results.user.email, full_name: results.user.full_name, token: results.token, admin: results.user.admin};
+        var sessionUser = {
+            _id: results.user.email,
+            full_name: results.user.full_name,
+            token: results.token,
+            admin: results.user.admin
+        };
         console.log(sessionUser);
         done(null, sessionUser);
     });
 
-   passport.deserializeUser(function(id, done) {
-       console.log("DESERIALIZE " +  id);
-       models.User
-           .findById(id, function(err, user) {
-           done(err, user);
-       });
-   });
-
+    passport.deserializeUser(function (id, done) {
+        console.log("DESERIALIZE " + id);
+        models.User
+            .findById(id, function (err, user) {
+                done(err, user);
+            });
+    });
 
 
     // =========================================================================
@@ -53,94 +57,95 @@ module.exports = function (passport) {
 
     passport.use('localSignup', new localStrategy(localSignupOptions, function (req, email, password, done) {
 
-       console.log('entering signup from passport signup strategy');
+        console.log('entering signup from passport signup strategy');
 
-       console.log('controllo che l\'utente non sia gia registrato con email: ' + email);
-       models.User
-           .findById(email)
-           .then(function(user) {
-               // L'utente è già registrato
-               if (user !== null) {
-                   console.log('Utente gia registrato');
-                   return done(null, false);
-               }
-               else {
-                   console.log('utente non ancora registrato');
+        console.log('controllo che l\'utente non sia gia registrato con email: ' + email);
+        models.User
+            .findById(email)
+            .then(function (user) {
+                // L'utente è già registrato
+                if (user !== null) {
+                    console.log('Utente gia registrato');
+                    return done(null, false, {message: "Utente già registrato"});
+                }
+                else {
+                    console.log('utente non ancora registrato');
 
                     // Verifica che le password inserite coincidano
-                   if(req.body.password === req.body.confirm_password) {
-                       // Le password coincidono
+                    if (req.body.password === req.body.confirm_password) {
+                        // Le password coincidono
 
-                       console.log('Inserimento nel database...');
-                       async.waterfall([
-                               function(next) {
-                                   console.log('encrypt password...');
-                                   password_utility.cryptPassword(password, function (err, password) {
-                                       if(err) {
-                                           console.log('error password encrypt');
-                                           next(err);
-                                       }
-                                       else {
-                                           next(null, password);
-                                       }
-                                   });
-                               },
-                               // creazione utente
-                               function (password, next) {
-                                   console.log('creazione dell\'utente...');
-                                   models.User
-                                       .create({
-                                           full_name: req.body.full_name,
-                                           email: email,
-                                           password: password
-                                       })
-                                       .then(function(user) {
-                                           console.log('utente creato.');
-                                           next(null, user);
-                                       })
-                                       .catch(function(err) {
-                                           console.log('errore nella creazione dell\'utente');
-                                           next(err);
-                                       });
-                               },
-                               // creazione token
-                               function (user, next) {
-                                   console.log('creazione token...');
-                                   models.Token
-                                       .create({
-                                           token: randtoken.generate(188),
-                                           type: 'Interno',
-                                           user_id: user.email
-                                       })
-                                       .then(function(token) {
-                                           console.log('token creato.');
-                                           next(null, {user: user, token: token});
-                                       })
-                                       .catch(function(err) {
-                                           console.log('errore nella creazione del token');
-                                           next(err);
-                                       });
-                               }
-                           ], function(err, results) {
-                               if (err) {
-                                   console.log('errori nel waterfall');
-                                   return done(err);
-                               }
-                               else {
-                                   console.log('utente: ' + results.user);
-                                   console.log('token: ' + results.token);
-                                   return done(null, results);
-                               }
-                           }
-                       );
-                   }
-                   else {
-                       // Le password non coincidono
-                       console.log('Le password inserite non coincidono');
-                       return done(null, false);
-                   }
-               }
-           })
+                        console.log('Inserimento nel database...');
+                        async.waterfall([
+                                function (next) {
+                                    console.log('encrypt password...');
+                                    password_utility.cryptPassword(password, function (err, password) {
+                                        if (err) {
+                                            console.log('error password encrypt');
+                                            next(err);
+                                        }
+                                        else {
+                                            next(null, password);
+                                        }
+                                    });
+                                },
+                                // creazione utente
+                                function (password, next) {
+                                    console.log('creazione dell\'utente...');
+                                    models.User
+                                        .create({
+                                            full_name: req.body.full_name,
+                                            email: email,
+                                            password: password
+                                        })
+                                        .then(function (user) {
+                                            console.log('utente creato.');
+                                            next(null, user);
+                                        })
+                                        .catch(function (err) {
+                                            console.log(err);
+                                            console.log('errore nella creazione dell\'utente');
+                                            next(err);
+                                        });
+                                },
+                                // creazione token
+                                function (user, next) {
+                                    console.log('creazione token...');
+                                    models.Token
+                                        .create({
+                                            token: randtoken.generate(188),
+                                            type: 'Interno',
+                                            user_id: user.email
+                                        })
+                                        .then(function (token) {
+                                            console.log('token creato.');
+                                            next(null, {user: user, token: token});
+                                        })
+                                        .catch(function (err) {
+                                            console.log('errore nella creazione del token');
+                                            next(err);
+                                        });
+                                }
+                            ], function (err, results) {
+                                if (err) {
+                                    console.log('errori nel waterfall');
+                                    return done(err);
+                                }
+                                else {
+                                    console.log('utente: ' + results.user);
+                                    console.log('token: ' + results.token);
+                                    return done(null, results);
+                                }
+                            }
+                        );
+                    }
+                    else {
+                        // Le password non coincidono
+                        console.log('Le password inserite non coincidono');
+                        return done(null, false, {message: "Le password inserite non coincidono"});
+                    }
+                }
+            })
 
     }));
 
@@ -165,7 +170,7 @@ module.exports = function (passport) {
                 // L'utente non è registrato
                 if (user === null) {
                     console.log('Utente non registrato');
-                    return done(null, false);
+                    return done(null, false, {message: "Utente non registrato"});
                 }
                 else {
                     console.log('utente gia registrato: controllo password...:');
@@ -183,19 +188,19 @@ module.exports = function (passport) {
                                         user_id: user.email
                                     }
                                 })
-                                .then(function(foundToken) {
+                                .then(function (foundToken) {
                                     //token interno non trovato
-                                    if(foundToken === null) {
+                                    if (foundToken === null) {
                                         console.log('Token interno non esistente');
-                                        return done(null, {user:user, token : null});
+                                        return done(null, {user: user, token: null});
                                     }
                                     // token interno trovato
                                     else {
                                         console.log('token trovato');
-                                        return done(null, {user: user, token : foundToken});
+                                        return done(null, {user: user, token: foundToken});
                                     }
                                 })
-                                .catch(function(err) {
+                                .catch(function (err) {
                                     console.log('errore durante la ricerca del token interno ' + err);
                                     return done(err);
                                 });
@@ -205,7 +210,7 @@ module.exports = function (passport) {
                         // password sbagliata
                         else {
                             console.log('password errata');
-                            return done(null, false);
+                            return done(null, false, {message: 'Password sbagliata'});
                         }
                     });
                 }
@@ -231,17 +236,17 @@ module.exports = function (passport) {
 
     passport.use('googleLogin', new googleStrategy(googleLoginOptions, function (token, refreshToken, profile, done) {
         // FIXME Google non riconosce l'email con i punti
-        console.log('entering google from passport google strategy') ;
+        console.log('entering google from passport google strategy');
         var email = profile.emails[0].value;
 
         console.log('controllo che l\'utente sia gia registrato con email ' + email);
         models.User
             .findById(email)
-            .then(function(user) {
+            .then(function (user) {
                 // l'utente non è registrato
-                if(user === null) {
+                if (user === null) {
                     console.log('Utente non registrato');
-                    return done(null, false);
+                    return done(null, false, {message: "Utente non registrato"});
                 }
                 else {
                     console.log('utente gia registrato: cerco/creo token google...:');
@@ -252,9 +257,9 @@ module.exports = function (passport) {
                                 user_id: user.email
                             }
                         })
-                        .then(function(foundToken) {
+                        .then(function (foundToken) {
                             // token non trovato
-                            if(foundToken === null) {
+                            if (foundToken === null) {
                                 console.log('token facebook non trovato.');
                                 console.log('creazione token google...');
 
@@ -266,12 +271,28 @@ module.exports = function (passport) {
                                         token: token,
                                         data: profile
                                     })
-                                    .then (function(newToken) {
+                                    .then(function (newToken) {
                                         console.log('token creato ' + newToken);
                                         return done(null, {user: user, token: newToken});
                                     })
-                                    .catch(function(err){
+                                    .catch(function (err) {
                                         console.log('errore durante la creazione del token');
+                                        return done(err);
+                                    });
+                            }
+                            else if (foundToken !== token) {
+                                console.log("Update token");
+                                foundToken
+                                    .updateAttributes({
+                                        token: token,
+                                        data: profile
+                                    })
+                                    .then(function (updatedToken) {
+                                        console.log('Token modificato');
+                                        return done(null, {user: user, token: updatedToken});
+                                    })
+                                    .catch(function (err) {
+                                        console.log('errore nella modifica dell token');
                                         return done(err);
                                     });
                             }
@@ -281,13 +302,13 @@ module.exports = function (passport) {
                                 return done(null, {user: user, token: foundToken});
                             }
                         })
-                        .catch(function(err) {
+                        .catch(function (err) {
                             console.log('errore nella ricerca dell token');
                             return done(err);
                         });
                 }
             })
-            .catch(function(err) {
+            .catch(function (err) {
                 console.log('errore nella ricerca dell\'utente');
                 return done(err);
             });
@@ -309,17 +330,17 @@ module.exports = function (passport) {
 
     passport.use('facebookLogin', new facebookStrategy(facebookLoginOptions, function (token, refreshToken, profile, done) {
 
-        console.log('entering facebook from passport facebook strategy') ;
+        console.log('entering facebook from passport facebook strategy');
         var email = profile.emails[0].value;
 
         console.log('controllo che l\'utente sia gia registrato con email ' + email);
         models.User
             .findById(email)
-            .then(function(user) {
+            .then(function (user) {
                 // l'utente non è registrato
-                if(user === null) {
+                if (user === null) {
                     console.log('Utente non registrato');
-                    return done(null, false);
+                    return done(null, false, {message: "Utente non registrato"});
                 }
                 else {
                     console.log('utente gia registrato: cerco/creo token facebook...:');
@@ -330,9 +351,9 @@ module.exports = function (passport) {
                                 user_id: user.email
                             }
                         })
-                        .then(function(foundToken) {
+                        .then(function (foundToken) {
                             // token non trovato
-                            if(foundToken === null) {
+                            if (foundToken === null) {
                                 console.log('token facebook non trovato.');
                                 console.log('creazione token facebook...');
 
@@ -344,30 +365,46 @@ module.exports = function (passport) {
                                         token: token,
                                         data: profile
                                     })
-                                    .then (function(newToken) {
+                                    .then(function (newToken) {
                                         console.log('token creato ' + newToken);
                                         return done(null, {user: user, token: newToken});
                                     })
-                                    .catch(function(err){
+                                    .catch(function (err) {
                                         console.log('errore durante la creazione del token');
+                                        return done(err);
+                                    });
+                            }
+                            else if (foundToken !== token) {
+                                console.log("Update token");
+                                foundToken
+                                    .updateAttributes({
+                                        token: token,
+                                        data: profile
+                                    })
+                                    .then(function (updatedToken) {
+                                        console.log('Token modificato');
+                                        return done(null, {user: user, token: updatedToken});
+                                    })
+                                    .catch(function (err) {
+                                        console.log('errore nella modifica dell token');
                                         return done(err);
                                     });
                             }
                             //token trovato
                             else {
                                 console.log('token facebbok trovato ' + foundToken);
-                                return done(null, {user: user, token:foundToken});
+                                return done(null, {user: user, token: foundToken});
                             }
                         })
-                        .catch(function(err) {
-                           console.log('errore nella ricerca dell token');
-                           return done(err);
+                        .catch(function (err) {
+                            console.log('errore nella ricerca dell token');
+                            return done(err);
                         });
                 }
             })
-            .catch(function(err) {
-               console.log('errore nella ricerca dell\'utente');
-               return done(err);
+            .catch(function (err) {
+                console.log('errore nella ricerca dell\'utente');
+                return done(err);
             });
     }));
 
