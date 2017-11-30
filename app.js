@@ -20,8 +20,10 @@ app.use(session({
 
 // APIs
 var users = require('./routes/users');
+var reports = require('./routes/reports');
 
 app.use('/api/v1/users', users);
+app.use('/api/v1/reports', reports);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
