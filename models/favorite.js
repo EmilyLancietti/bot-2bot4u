@@ -4,7 +4,8 @@ module.exports = function (sequelize, DataTypes) {
     var Favorite = sequelize.define('Favorite', {
         order: {
             type: DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            default: 0
         }
     });
 
