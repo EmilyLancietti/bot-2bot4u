@@ -9,13 +9,6 @@ module.exports = function (passport) {
     // =====================================
     // SIGNUP ROUTES =======================
     // =====================================
-
-    // TODO: togliere
-    router.get('/signup', function (req, res) {
-        res.render('signup.ejs');
-    });
-
-
     router.post('/signup', function (req, res, next) {
         // Custom callback
         passport.authenticate('localSignup', function (err, user, info) {
@@ -40,11 +33,6 @@ module.exports = function (passport) {
     // =====================================
     // LOGIN ROUTES ========================
     // =====================================
-    router.get('/login', function (req, res) {
-        res.render('login.ejs');
-    });
-
-
     router.post('/login', function (req, res, next) {
         // Custom callback
         passport.authenticate('localLogin', function (err, user, info) {
@@ -58,7 +46,7 @@ module.exports = function (passport) {
                     if (loginErr) {
                         response(res, loginErr, 401);
                     }
-                    response(res, req.user.token.token, 201);
+                    response(res, req.user.token.token, 200);
                 });
             }
         })(req, res, next);
@@ -86,12 +74,11 @@ module.exports = function (passport) {
                     if (loginErr) {
                         response(res, loginErr, 401);
                     }
-                    response(res, req.user.token.token, 200);
+                    res.redirect("https://2bot4u.github.io/sociallogin.html?token=" + req.user.token.token);
                 });
             }
         })(req, res, next);
     });
-
 
 
     // =====================================
@@ -114,7 +101,7 @@ module.exports = function (passport) {
                     if (loginErr) {
                         response(res, loginErr, 401);
                     }
-                    response(res, req.user.token.token, 200);
+                    res.redirect("https://2bot4u.github.io/sociallogin.html?token=" + req.user.token.token);
                 });
             }
         })(req, res, next);
@@ -126,15 +113,7 @@ module.exports = function (passport) {
     // =====================================
     router.get('/logout', function (req, res) {
         req.logout();
-        res.redirect('/passport/');
-    });
-
-
-    // =====================================
-    // INDEX ===============================
-    // =====================================
-    router.get('/', function (req, res) {
-        res.render('index.ejs');
+        res.redirect('https://2bot4u.github.io/logout.html');
     });
 
     return router;

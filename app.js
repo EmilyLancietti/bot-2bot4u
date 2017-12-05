@@ -32,7 +32,7 @@ var users = require('./routes/users');
 var passport_routes = require('./routes/passport')(passport);
 
 app.use('/api/v1/users', users);
-app.use('/passport', passport_routes);
+app.use('/api/v1/users', passport_routes);
 
 var path = require('path');
 app.set('views', path.join(__dirname, 'views'));
