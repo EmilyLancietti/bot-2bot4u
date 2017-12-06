@@ -25,18 +25,14 @@ require('./config/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
-
-
 // APIs
 var users = require('./routes/users');
 var passport_routes = require('./routes/passport')(passport);
+var inserts = require('./routes/inserts');
 
 app.use('/api/v1/users', users);
 app.use('/api/v1/users', passport_routes);
-
-var path = require('path');
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.use('/api/v1/inserts', inserts);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
