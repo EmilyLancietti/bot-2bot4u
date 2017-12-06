@@ -8,11 +8,6 @@ module.exports = function(sequelize, DataTypes) {
             unique: true,
             primaryKey: true
         },
-        insertions: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            defaultValue: 0
-        },
         reports: {
             type: DataTypes.INTEGER,
             allowNull: false,

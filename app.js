@@ -29,10 +29,12 @@ app.use(passport.session());
 var users = require('./routes/users');
 var passport_routes = require('./routes/passport')(passport);
 var inserts = require('./routes/inserts');
+var reports = require('./routes/reports');
 
 app.use('/api/v1/users', users);
 app.use('/api/v1/users', passport_routes);
 app.use('/api/v1/inserts', inserts);
+app.use('/api/v1/reports', reports);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
