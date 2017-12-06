@@ -3,6 +3,9 @@ var async = require('async');
 var randtoken = require('rand-token');
 
 var password_utility = require('../modules/password_utility');
+var isAuthenticated = require('../modules/is_authenticated');
+
+var response = require('../modules/json_response');
 
 var router = express.Router();
 
@@ -101,6 +104,50 @@ router.get('/auth_token', function (req, res, next) {
             }
         });
     }
+});
+
+router.get('/favorite', isAuthenticated, function (req, res, next) {
+    models.Favorite
+        .findAll({
+            where: {
+                user_id: req.session.user.email
+            }
+        })
+        .then(function (favorites) {
+            var results = [];
+            async.eachSeries(favorites, function (value, callback) {
+                models.Transport
+                    .findAll({
+                        where: {
+                            identifier: value.transport_id
+                        },
+                        attributes: {exclude: ['createdAt', 'updatedAt']},
+                        include: [{
+                            model: models.Code,
+                            attributes: {exclude: ['createdAt', 'updatedAt', 'insertions', 'reports', 'transport_id']}
+                        }]
+                    })
+                    .then(function (transports) {
+                        results.push(transports);
+                        callback();
+                    });
+            }, function (err) {
+                if (err) {
+                    response(res, err, 500);
+                } else {
+                    response(res, results, 200);
+                }
+            });
+
+        })
+        .catch(function (err) {
+            response(res, err, 500);
+        });
+});
+
+
+router.post('/favorite/insert', isAuthenticated, function (req, res, next) {
+
 });
 
 module.exports = router;

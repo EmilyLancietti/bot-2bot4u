@@ -23,10 +23,9 @@ module.exports = {
                     model: 'Users',
                     key: 'email'
                 },
-                allowNull: true
+                allowNull: false
             },
             createdAt: {
-
                 type: Sequelize.DATE,
                 allowNull: false
             },
@@ -37,6 +36,6 @@ module.exports = {
         })
     },
     down: function (queryInterface, Sequelize) {
-        return queryInterface.dropTable('product_orders')
+        return queryInterface.dropTable('Favorites')
     }
 };
