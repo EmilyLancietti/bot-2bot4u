@@ -1,16 +1,17 @@
-var models = require('../models');
+'use strict';
 
-function isAuthenticated(req, res, next) {
+var models = require('../models');
+var response = require('../modules/json_response');
+
+module.exports = function (req, res, next) {
     var auth = req.headers['authorization'];
     if (!auth) {
-        res.statusCode = 401;
         res.setHeader('WWW-Authenticate', 'Basic realm="Secure Area"');
-        res.send('Need some creds son');
+        response(res, null, 401);
     }
     else if (auth) {
         var tmp = auth.split(' ');
 
-        // return next();
         if (tmp[0] === "Bearer") {
             var token = tmp[1];
 
@@ -23,16 +24,16 @@ function isAuthenticated(req, res, next) {
                 }]
             }).then(function (token) {
                 if (token === null) {
-                    res.statusCode = 403;
                     res.setHeader('WWW-Authenticate', 'Basic realm="Secure Area"');
-                    res.send('Forbidden');
+                    response(res, null, 403);
                 } else {
                     req.session.user = token.User;
                     next();
                 }
             });
+        } else {
+            res.setHeader('WWW-Authenticate', 'Basic realm="Secure Area"');
+            response(res, null, 401);
         }
     }
-}
-
-module.exports = isAuthenticated;
+};
