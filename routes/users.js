@@ -3,53 +3,61 @@
 var express = require('express');
 var async = require('async');
 
-var password_utility = require('../modules/password_utility');
 var isAuthenticated = require('../modules/is_authenticated');
 var response = require('../modules/json_response');
 
 var router = express.Router();
 var models = require('../models');
 
-// Richiesta Token
-router.get('/auth_token', function (req, res, next) {
-    var auth = req.headers['authorization'];
-    if (!auth) {
-        res.statusCode = 401;
-        res.setHeader('WWW-Authenticate', 'Basic realm="Secure Area"');
-        res.send('Need some creds son');
-    }
-    else if (auth) {
-        var tmp = auth.split(' '); // Divido la stringa del tipo "Basic Y2hhcmxlczoxMjM0NQ=="
 
-        var buf = new Buffer(tmp[1], 'base64');
-        var plain_auth = buf.toString();
-
-        var creds = plain_auth.split(':');
-        var email = creds[0];
-        var password = creds[1];
-
-        models.User.findById(email, {
-            include: [{
-                model: models.Token
-            }]
-        }).then(function (user) {
+router.post('/email_confirmation', function (req, res) {
+    models.User
+        .findById(req.body.email)
+        .then(function (user) {
             if (user === null) {
-                res.status(404);
-                res.send("User not Found");
+                response(res, {message: "Utente non trovato"}, 404);
             } else {
-                password_utility.comparePassword(password, user.password, function (isPasswordMatch) {
-                    if (isPasswordMatch) {
-                        res.send(user.Tokens);
-                    } else {
-                        res.statusCode = 401;
-                        res.setHeader('WWW-Authenticate', 'Basic realm="Secure Area"');
-                        res.send('Access Denied');
-                    }
-                });
+                if (user.confirmation_code === req.body.code) {
+                    // Attivare account
+                    user
+                        .updateAttributes({
+                            confirmation_code: null
+                        })
+                        .then(function () {
+                            // Recupero token per accesso diretto
+                            user
+                                .reload({
+                                    include: [{
+                                        model: models.Token,
+                                        where: {
+                                            type: 'Interno'
+                                        }
+                                    }]
+                                })
+                                .then(function (user_token) {
+                                    response(res, {
+                                        message: "Account attivato",
+                                        token: user_token.Tokens[0].token
+                                    }, 200);
+                                })
+                                .catch(function (err) {
+                                    response(res, err, 500);
+                                });
+                        })
+                        .catch(function (err) {
+                            response(res, err, 500);
+                        })
+                } else {
+                    // Errore nel codice
+                    response(res, {message: "Codice non valido"}, 400);
+                }
             }
-        });
-    }
+        })
+        .catch(function (err) {
+            response(res, err, 500);
+        })
 });
+
 
 router.get('/favorite', isAuthenticated, function (req, res, next) {
     models.Favorite

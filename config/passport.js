@@ -9,6 +9,7 @@ var async = require('async');
 var randtoken = require('rand-token');
 
 var password_utility = require('../modules/password_utility');
+var emailConfirmation = require('../modules/email_confirmation');
 
 var models = require('../models');
 
@@ -96,7 +97,8 @@ module.exports = function (passport) {
                                         .create({
                                             full_name: req.body.full_name,
                                             email: email,
-                                            password: password
+                                            password: password,
+                                            confirmation_code: randtoken.generate(32)
                                         })
                                         .then(function (user) {
                                             console.log('utente creato.');
@@ -132,8 +134,8 @@ module.exports = function (passport) {
                                     return done(err);
                                 }
                                 else {
-                                    console.log('utente: ' + results.user);
-                                    console.log('token: ' + results.token);
+                                    // Invio email di conferma
+                                    emailConfirmation(results.user);
                                     return done(null, results);
                                 }
                             }
