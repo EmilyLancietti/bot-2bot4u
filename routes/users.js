@@ -1,6 +1,8 @@
 'use strict';
 
 var express = require('express');
+var async = require('async');
+
 var password_utility = require('../modules/password_utility');
 var isAuthenticated = require('../modules/is_authenticated');
 var response = require('../modules/json_response');
