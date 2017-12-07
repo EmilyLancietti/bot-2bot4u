@@ -147,7 +147,29 @@ router.get('/favorite', isAuthenticated, function (req, res, next) {
 
 
 router.post('/favorite/insert', isAuthenticated, function (req, res, next) {
-
+    models.Transport
+        .findById(req.body.mezzo)
+        .then(function (mezzo) {
+            if (mezzo === null) {
+                console.log("Mezzo non esistente");
+                response(res, {message: "Il mezzo inserito non esiste"}, 404);
+            } else {
+                models.Favorite
+                    .create({
+                        user_id: req.session.user.email,
+                        transport_id: req.body.mezzo
+                    })
+                    .then(function (favorite) {
+                        response(res, favorite, 201);
+                    })
+                    .catch(function (err) {
+                        response(res, err, 500);
+                    })
+            }
+        })
+        .catch(function (err) {
+            response(res, err, 500);
+        })
 });
 
 module.exports = router;

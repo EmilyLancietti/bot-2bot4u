@@ -3,19 +3,14 @@
 module.exports = {
     up: function (queryInterface, Sequelize) {
         return queryInterface.createTable('Favorites', {
-            id: {
-                allowNull: false,
-                autoIncrement: true,
-                primaryKey: true,
-                type: Sequelize.INTEGER
-            },
             transport_id: {
                 type: Sequelize.STRING,
                 references: {
                     model: 'Transports',
                     key: 'identifier'
                 },
-                allowNull: false
+                allowNull: false,
+                primaryKey: true
             },
             user_id: {
                 type: Sequelize.STRING,
@@ -23,7 +18,8 @@ module.exports = {
                     model: 'Users',
                     key: 'email'
                 },
-                allowNull: false
+                allowNull: false,
+                primaryKey: true
             },
             createdAt: {
                 type: Sequelize.DATE,
