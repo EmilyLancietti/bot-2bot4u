@@ -15,7 +15,7 @@ app.use(session({
     secret: 'j2dfn923dnSFnnf£%eun!scefwfnCC_3',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true }
+    cookie: {secure: true}
 }));
 
 // Configuring Passport
@@ -28,12 +28,14 @@ app.use(passport.session());
 // APIs
 var users = require('./routes/users');
 var passport_routes = require('./routes/passport')(passport);
+var requests = require('./routes/requests');
 var inserts = require('./routes/inserts');
 var reports = require('./routes/reports');
 var feedbacks = require('./routes/feedbacks');
 
 app.use('/api/v1/users', users);
 app.use('/api/v1/users', passport_routes);
+app.use('/api/v1/requests', requests);
 app.use('/api/v1/inserts', inserts);
 app.use('/api/v1/reports', reports);
 app.use('/api/v1/feedbacks', feedbacks);
