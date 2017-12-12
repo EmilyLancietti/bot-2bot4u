@@ -61,7 +61,7 @@ router.get('/:matricola/:codice', isAuthenticated, function (req, res, next) {
         }
     ], function (err, results) {
         if (err) {
-            response(res, err, 400);
+            response(res, {message: err}, 400);
         }
         else {
             response(res, results, 201);
