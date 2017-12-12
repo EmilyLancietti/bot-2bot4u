@@ -23,7 +23,7 @@ module.exports = function (passport) {
                     if (loginErr) {
                         response(res, loginErr, 401);
                     }
-                    response(res, req.user.token.token, 201);
+                    response(res, {message: "Utente registrato in attesa di verifica email"}, 201);
                 });
             }
         })(req, res, next);
