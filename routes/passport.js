@@ -46,7 +46,7 @@ module.exports = function (passport) {
                     if (loginErr) {
                         response(res, loginErr, 401);
                     }
-                    response(res, req.user.token.token, 200);
+                    response(res, {token: req.user.token.token}, 200);
                 });
             }
         })(req, res, next);

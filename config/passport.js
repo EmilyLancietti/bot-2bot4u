@@ -181,33 +181,39 @@ module.exports = function (passport) {
                         if (isPasswordMatch) {
                             console.log('password corretta');
 
-                            //cerco token interno
+                            console.log(user.confirmation_code);
+                            console.log(user.confirmation_code === null);
 
-                            models.Token
-                                .findOne({
-                                    where: {
-                                        type: 'Interno',
-                                        user_id: user.email
-                                    }
-                                })
-                                .then(function (foundToken) {
-                                    //token interno non trovato
-                                    if (foundToken === null) {
-                                        console.log('Token interno non esistente');
-                                        return done(null, {user: user, token: null});
-                                    }
-                                    // token interno trovato
-                                    else {
-                                        console.log('token trovato');
-                                        return done(null, {user: user, token: foundToken});
-                                    }
-                                })
-                                .catch(function (err) {
-                                    console.log('errore durante la ricerca del token interno ' + err);
-                                    return done(err);
-                                });
-
-
+                            if (user.confirmation_code === null) {
+                                // Utente Attivo
+                                //cerco token interno
+                                models.Token
+                                    .findOne({
+                                        where: {
+                                            type: 'Interno',
+                                            user_id: user.email
+                                        }
+                                    })
+                                    .then(function (foundToken) {
+                                        //token interno non trovato
+                                        if (foundToken === null) {
+                                            console.log('Token interno non esistente');
+                                            return done(null, {user: user, token: null});
+                                        }
+                                        // token interno trovato
+                                        else {
+                                            console.log('token trovato');
+                                            return done(null, {user: user, token: foundToken});
+                                        }
+                                    })
+                                    .catch(function (err) {
+                                        console.log('errore durante la ricerca del token interno ' + err);
+                                        return done(err);
+                                    });
+                            } else {
+                                // Utente che deve ancora confermare l'email
+                                return done(null, false, {message: 'Utente non attivo, confermare indirizzo email'});
+                            }
                         }
                         // password sbagliata
                         else {
