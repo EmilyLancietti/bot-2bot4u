@@ -7,7 +7,7 @@ var models = require('../models');
 router.get('/:matricola', function (req, res) {
     models.Transport
         .findOne({
-            where: {identifier: req.params.matricola},
+            where: {identifier: req.params.matricola.toLowerCase()},
             attributes: {
                 exclude: ['createdAt', 'updatedAt']
             },

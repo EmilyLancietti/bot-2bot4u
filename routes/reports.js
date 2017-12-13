@@ -20,8 +20,8 @@ router.get('/:matricola/:codice', isAuthenticated, function (req, res, next) {
             models.ReportRequest
                 .findAndCountAll({
                     where: {
-                        transport: req.params.matricola,
-                        code: req.params.codice,
+                        transport: req.params.matricola.toLowerCase(),
+                        code: req.params.codice.toUpperCase(),
                         user_id: req.session.user.email,
                         createdAt: {
                             gte: dateNow
@@ -46,8 +46,8 @@ router.get('/:matricola/:codice', isAuthenticated, function (req, res, next) {
             console.log('creazione');
             models.ReportRequest
                 .create({
-                    transport: req.params.matricola,
-                    code: req.params.codice,
+                    transport: req.params.matricola.toLowerCase(),
+                    code: req.params.codice.toUpperCase(),
                     user_id: req.session.user.email
                 })
                 .then(function (insertRequest) {
