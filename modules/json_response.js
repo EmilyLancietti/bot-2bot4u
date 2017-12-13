@@ -47,7 +47,7 @@ module.exports = function (res, data, statusCode) {
     //Enabling CORS
     res.header('Access-Control-Allow-Origin', '*');
     //Support header x-access-token for the authentication token
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, x-access-token');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, x-access-token, Authorization');
     res.header('Content-Type', 'application/json');
     res.status(statusCode).send({
         data: data,
